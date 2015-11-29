@@ -35,6 +35,15 @@ def main():
     
     It is possible to have multiple .aux files in a latex folder. If so, the
     collective references are written to output "extract_bib.bib" file.
+    
+    Updated Note:
+    ============
+    I just realize that this script does the similar job of
+    the "aux2bib" in the BibTeX2HTML collection tools, which
+    reads a .aux file as produced by LaTeX and writes
+    to standard output a BibTeX file containing exactly the
+    BibTeX entries refereed in the .aux file.
+    [https://www.lri.fr/~filliatr/ftp/bibtex2html/README]
     """
     
     # Get all .aux files from the current folder
