@@ -39,7 +39,7 @@ def main():
     try:
         req = requests.get(URL)
     except requests.ConnectionError:
-        print("Connection Error: Be sure your Zotero Standalone is running!")
+        print("Connection Error: Be sure you have Zotero Standalone running!")
         exit()
     
     new_bib = process_zotero_localhost_bib(req.content)
