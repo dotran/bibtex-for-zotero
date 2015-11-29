@@ -17,16 +17,13 @@ import requests
 
 EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
 
-infile  = "E:\\RES\\Lib\\Bib\\JabRef\\allZotero.bib"
-outfile = "./biblio.bib"
+outfile  = "E:\\RES\\Lib\\Bib\\JabRef\\bibdb.bib"
+# outfile = "./biblio.bib"
 
 def main():
     """
-    This script will read your persistent/long-running bib database and then
-    pull new entries from your Zotero to create a joint, newer bib file.
-    
-    You need to specify your existing .bib database as a base bib database
-    and specify the output .bib file to store the new database.
+    This script exports the whole library (or only a collection if specified)
+    in Zotero Standalone to a BibTeX .bib file using the Better BibTeX format.
     
     Note: As it is time consuming to pull items from the Zotero Web API
     (either with HTTP request or with the help of the "pyzotero" library),
@@ -38,7 +35,7 @@ def main():
     
     # Export the whole Zotero library to BibTeX using Better BibTeX
     URL = "http://localhost:23119/better-bibtex/library?library.bibtex"
-    # URL = "http://localhost:23119/better-bibtex/collection?/0/QBN8FDDA.bibtex"
+    # URL = "http://localhost:23119/better-bibtex/collection?/0/QBN8FDDA.bibtex"  # for only one collection
     try:
         req = requests.get(URL)
     except requests.ConnectionError:
@@ -49,48 +46,14 @@ def main():
     fix_and_split_bib_database(new_bib)
     format_output_data(new_bib)
     
-    bib_data = read_bib_database(infile)
-    fix_and_split_bib_database(bib_data)
-    format_output_data(bib_data)
-    
-    add_new_entries_to_basebib(basebib=bib_data, newbib=new_bib)
-    
     # Write the extracted bib data to file
     with open(outfile, 'wb') as f:
-        for record in bib_data:
+        for record in new_bib:
             # f.write(os.linesep)
             f.write('\n')
             f.write('\n'.join(record['outdata']))
             f.write('\n')
-    print("%s nicely formatted entries written to '%s'" % (len(bib_data), outfile))
-    
-    
-    """
-    # Using pyzotero library, instead of making direct HTTP request to Zotero Web API
-    zot = zotero.Zotero(library_id='1123907',
-                        library_type='user',
-                        api_key='E2DDvV8ONTGhpSBsL3S2YCPs')
-    # zot.add_parameters(format='bibtex', sort='dateAdded', direction='desc', limit=100, start=3000)
-    # items = zot.top()
-    # print(items[-1000:])
-    # pprint.pprint(items[-1]['data'])
-    """
-    # max_limit = 100
-    # i = 0
-    # raw_data = ""
-    # while i >= 0:
-    #     """
-    #     # Using pyzotero library, instead of making direct HTTP request to Zotero Web API
-    #     zot.add_parameters(format='bibtex', sort='dateAdded', direction='desc', limit=max_limit, start=i*max_limit)
-    #     buf = zot.top()
-    #     """
-    #     buf = request_to_zotero_web_api(limit=max_limit, start=i*max_limit)
-    #     raw_data = raw_data + '\n' + buf
-    #     print(i)
-    #     i = i + 1 if buf else -1
-    # # Write to text file
-    # with open('zotero_web_api.bib', 'wb') as f:
-    #     f.write(raw_data)
+    print("%s nicely formatted entries written to '%s'" % (len(new_bib), outfile))
     
 
 def request_to_zotero_web_api(limit, start):
