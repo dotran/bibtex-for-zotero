@@ -68,7 +68,6 @@ def main():
         format_bib_html(html)
     
 
-
 def format_bib_html(html_file):
     f = open(html_file, 'rb')
     new_content = []
