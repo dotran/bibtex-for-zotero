@@ -96,6 +96,9 @@ def fix_and_split_bib_database(list_of_dicts):
                     if all(b in value for b in ['}', '{']) and value.index('}') < value.index('{'):
                         value = '{' + value + '}'
                 # TODO: if you want to fix format for some fields, do it here
+                if field == 'year' and len(value) != 4:
+                    m = re.search(r'[1|2]\d{3}', value)
+                    if m: value = m.group()
                 item['data'][field] = value
             else:
                 print("The following line cannot be extracted by the rule 'field = value':")
