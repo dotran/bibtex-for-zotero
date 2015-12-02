@@ -17,7 +17,7 @@ import requests
 
 EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
 
-outfile  = "E:\\RES\\Lib\\Bib\\JabRef\\bibdb.bib"
+outfile  = "E:\\RES\\Lib\\Bib\\zbiball.bib"
 # outfile = "./biblio.bib"
 
 def main():
@@ -187,6 +187,9 @@ def fix_and_split_bib_database(list_of_dicts):
                     if all(b in value for b in ['}', '{']) and value.index('}') < value.index('{'):
                         value = '{' + value + '}'
                 # TODO: if you want to fix format for some fields, do it here
+                if field == 'pages' and '--' in value:
+                    m = re.search(r'(.*\d+)(\s*--\s*)([a-zA-Z]?\d+.*)', value)
+                    if m: value = m.groups()[0] + '--' + m.groups()[2]
                 if field == 'year' and len(value) != 4:
                     m = re.search(r'[1|2]\d{3}', value)
                     if m: value = m.group()

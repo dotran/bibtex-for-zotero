@@ -19,7 +19,7 @@ import requests
 # EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
 EXCLUDED_FIELDS = ('note', 'isbn', 'keywords', 'shorttitle', 'issn', 'copyright', 'timestamp', 'language', 'urldate')
 
-outfile  = "E:/RES/Lib/Bib/JabRef/bibdb.bib"
+outfile  = "E:/RES/Lib/Bib/zbiball.bib"
 # outfile = "./biblio.bib"
 
 def main():
@@ -50,13 +50,13 @@ def main():
     
     # Use BibTeX2HTML to generate a .html from the produced .bib file
     os.environ['TEMP'] = '.'
-    os.system("bibtex2html.exe -s plain_boldtitle -both -use-keys -nf file PDF -d -r %s" % (outfile))
+    os.system("bibtex2html.exe -s plain_boldtitle -m bibtex2html_macros.tex -both -use-keys -nf file PDF -d -r %s" % (outfile))
     
     # Copy the generated .html files to the same folder of 'outfile'
     bib_file = os.path.basename(outfile)
-    html_file = bib_file[:-4] + '.html'
-    html_abstracts_file = bib_file[:-4] + '_abstracts.html'
-    html_bib_file = bib_file[:-4] + '_bib.html'
+    html_file = bib_file[:-4] + ".html"
+    html_abstracts_file = bib_file[:-4] + "_abstracts.html"
+    html_bib_file = bib_file[:-4] + "_bib.html"
     if os.path.dirname(outfile) != '.':
         for f in [html_file, html_abstracts_file, html_bib_file]:
             shutil.copyfile(f, os.path.join(os.path.dirname(outfile), f))
@@ -117,23 +117,26 @@ a:hover {
         elif re.search(r'</b>\.?\Z', line):
             line = line.replace('</b>', '</font>')
         
-        elif re.match(r'<a href=.*>DOI</a>', line):
+        elif '>DOI<' in line:
             line = line.replace(">DOI<", ">doi<")
         
-        elif re.match(r'<a href=.*>Abstract</a>', line):
+        elif '>Abstract<' in line:
             line = line.replace(">Abstract<", ">abstract<")
         
-        elif re.match(r'<blockquote><font size="-1">', line):
+        elif '<blockquote><font size="-1">' in line:
             line = line.replace('<blockquote><font size="-1">', '<blockquote>')
         
-        elif re.match(r'</font></blockquote>', line):
+        elif '</font></blockquote>' in line:
             line = line.replace('</font></blockquote>', '</blockquote>')
         
-        elif re.search(r'(.*\d+)(--|-)(\d+.*)', line):
+        elif not html_file.endswith("_bib.html") and re.search(r'(.*\d+)(--|-)(\d+.*)', line) and '>http<' not in line and '>PDF<' not in line:
             m = re.search(r'(.*\d+)(--|-)(\d+.*)', line)
             line = m.groups()[0] + '&ndash;' + m.groups()[2]
+        elif not html_file.endswith("_bib.html") and re.search(r'(.*[a-zA-Z]\d+)(--|-)([a-zA-Z]\d+\,.*)', line) and '>http<' not in line and '>PDF<' not in line:
+            m = re.search(r'(.*[a-zA-Z]\d+)(--|-)([a-zA-Z]\d+\,.*)', line)
+            line = m.groups()[0] + '&ndash;' + m.groups()[2]
         
-        elif re.match(r'\s*(file|abstract) = \{(.*)\}\,?', line):
+        elif html_file.endswith("_bib.html") and 'file = {' in line or 'abstract = {' in line:
             if "}" in line and "}," not in line:
                 new_content[-1] = new_content[-1].replace("},", "}")
             continue
@@ -152,7 +155,6 @@ a:hover {
         f.write('\n'.join(new_content))
         # f.write(os.linesep.join(new_content))
     
-
 
 def request_to_zotero_web_api(limit, start):
     import requests
@@ -284,6 +286,9 @@ def fix_and_split_bib_database(list_of_dicts):
                     if all(b in value for b in ['}', '{']) and value.index('}') < value.index('{'):
                         value = '{' + value + '}'
                 # TODO: if you want to fix format for some fields, do it here
+                if field == 'pages' and '--' in value:
+                    m = re.search(r'(.*\d+)(\s*--\s*)([a-zA-Z]?\d+.*)', value)
+                    if m: value = m.groups()[0] + '--' + m.groups()[2]
                 if field == 'year' and len(value) != 4:
                     m = re.search(r'[1|2]\d{3}', value)
                     if m: value = m.group()
