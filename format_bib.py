@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+import sys
 import time
 import csv
 import re
@@ -15,16 +16,15 @@ import pprint
 
 EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
 
-infile  = "E:\\RES\\Lib\\Bib\\JabRef\\allZotero.bib"
-outfile = "E:\\RES\\Lib\\Bib\\JabRef\\bibdb.bib"
+infile  = "E:\\RES\\Lib\\Bib\\zbiball.bib"
+outfile = "E:\\RES\\Lib\\Bib\\zbiball.bib"
 
-def main():
+def main(infile=infile, outfile=outfile):
     """
     This script is to read a .bib file and re-format it
     in order to create a cleaner and nicer ordering version.
     You need to only specify the 'infile' and 'outfile'.
     """
-    
     bib_data = read_bib_database(infile)
     fix_and_split_bib_database(bib_data)
     format_output_data(bib_data)
