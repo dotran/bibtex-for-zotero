@@ -64,6 +64,7 @@ def main():
 def format_bib_html(html_file):
     f = open(html_file, 'rb')
     new_content = []
+    buf = [None] * 5
     for line in f.readlines():
         line = line.splitlines()[0]  # removes \r\n and takes the string
         
@@ -150,6 +151,31 @@ a:hover {
         elif line.startswith('<a href="http://www.lri.fr/~filliatr/bibtex2html/">bibtex2html</a>'):
             continue
         
+        if not html_file.endswith("_bib.html"):
+            if '>.pdf</a>' in line:
+                line = line.replace('>.pdf</a>', '>http</a>')
+            elif '>.html</a>' in line:
+                line = line.replace('>.html</a>', '>http</a>')
+            # elif '>http</a>' in line:
+            #     line = line.replace('>http</a>', '>http</a>')
+            if any(i in line for i in [">bib</a>", ">doi</a>", ">PDF</a>", ">http</a>", ">abstract</a>"]):
+                s = line.strip().lstrip("[&nbsp;").rstrip("&nbsp;]").rstrip('&nbsp;|')
+                s = "&#x202F;" + s + "&#x202F;"
+                if ">PDF</a>" in s:         buf[0] = s
+                elif ">doi</a>" in s:       buf[1] = s
+                elif ">http</a>" in s:      buf[2] = s
+                elif ">bib</a>" in s:       buf[3] = s
+                elif ">abstract</a>" in s:  buf[4] = s
+                else:                       buf.append(s)
+                
+                if line.endswith("</a>&nbsp;]"):
+                    buf = list(filter(None, buf))
+                    newline = '[' + '|'.join(buf) + ']'
+                    new_content.append(newline)
+                    buf = [None] * 5
+                    continue
+                else:
+                    continue
         new_content.append(line)
     f.close()
     

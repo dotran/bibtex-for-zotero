@@ -207,14 +207,20 @@ def format_output(list_of_dicts, excluded_fields=[], keep_both_doi_url=False):
             if field in available_fields:
                 if field in excluded_fields: continue
                 if field == 'url' and 'doi' in item['data'].keys():  # omit URL if not specified or the URL is just a DOI link
-                    if not keep_both_doi_url or item['data']['doi'] in item['data']['url']: continue
+                    if not keep_both_doi_url or\
+                       item['data']['doi'] in item['data']['url'] or\
+                       any(s in item['data']['url'] for s in ["sciencedirect.com", "linkinghub.elsevier.com", "link.springer.com", "springerlink.com", "ieeexplore"]):
+                        continue
                 item['outdata'].append("  %s = {%s}," % (field, item['data'][field]))
                 available_fields.remove(field)
         if available_fields:
             for field in available_fields:
                 if field in excluded_fields: continue
                 if field == 'url' and 'doi' in item['data'].keys():
-                    if not keep_both_doi_url or item['data']['doi'] in item['data']['url']: continue
+                    if not keep_both_doi_url or\
+                       item['data']['doi'] in item['data']['url'] or\
+                       any(s in item['data']['url'] for s in ["sciencedirect.com", "linkinghub.elsevier.com", "link.springer.com", "springerlink.com", "ieeexplore"]):
+                        continue
                 item['outdata'].append("  %s = {%s}," % (field, item['data'][field]))
         
         item['outdata'][-1] = item['outdata'][-1][:-1]  # remove comma seperator for the last record
