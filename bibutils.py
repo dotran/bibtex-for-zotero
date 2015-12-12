@@ -165,10 +165,69 @@ def fix_and_split(list_of_dicts, omit_indecent_citekey=False):
                     elif value == 'oct': value = 'October'
                     elif value == 'nov': value = 'November'
                     elif value == 'dec': value = 'December'
+                if field == 'title':
+                    if value and '{' in value:
+                        value = format_title_brackets(value)
+                if field == 'booktitle':
+                    # Drop unnecessary brackets
+                    if value and '{' in value:
+                        value = value.replace('{\\textendash}', '--').replace('{\\textemdash}', '---')\
+                                     .replace('{{', '').replace('}}', '')
+                        # value = '{' + value + '}'
+                    # Fix things like GECCO '10
+                    value = value.replace(" '", "~'")
+                if field == 'series':
+                    value = value.replace(" '", "~'")
                 item['data'][field] = value
             else:
                 print("The following line cannot be extracted by the rule 'field = value':")
                 print(line)
+
+
+def format_title_brackets(inpstring):
+    buf = inpstring.replace('{\\textendash}', '--').replace('{\\textemdash}', '---')
+    # buf = inpstring.replace('{\\textendash}', '--').replace('{\\textemdash}', '---').replace('{\\backslash}', '\\').replace('\\{', '{').replace('\\}', '}')
+    string = ''
+    m = re.search(r'(.*?)\{\{(.+?)\}\}(.*)', buf)
+    while m:
+        string += m.groups()[0]
+        if m.groups()[1].startswith('\\'):
+            string += '{' + m.groups()[1] + '}'
+        else:
+            string += m.groups()[1]
+        buf = m.groups()[2]
+        m = re.search(r'(.*?)\{\{(.+?)\}\}(.*)', buf)
+    string += buf
+    
+    # string = " ".join(['{' + w + '}' if re.search(r'[A-Z]{2,}', w) else w for w in string.split()])
+    list_of_words = []
+    for w in string.split():
+        if re.search(r'[A-Z]{2,}', w) or re.search(r'[a-z]+[A-Z]{1,}', w):
+            if '-' in w and re.search(r'[a-zA-Z][a-z]{1,}', w):
+                # Like NSGA-Based --> {NSGA}-Based instead of {NSGA-Based}
+                # or QoS-ware --> {QoS}-aware instead of {QoS-aware}
+                word = '-'.join(['{' + g + '}' if re.search(r'[A-Z]{2,}', g) or re.search(r'[a-z]+[A-Z]{1,}', g)
+                                               else g for g in w.split('-')])
+            else:
+                # NSGA-II --> {NSGA-II} or PSO-NSGA-II --> {PSO-NSGA-II}
+                if w.endswith(':') or w.endswith(','):
+                    word = '{' + w[:-1] + '}' + w[-1]
+                else:
+                    word = '{' + w + '}'
+        else:
+            word = w
+        list_of_words.append(word)
+    string = " ".join(list_of_words)
+    
+    # Capitalize 'I' in "Part I"
+    m = re.search(r'(.+?\s)([B-Z]\b)(.*)', string)
+    if m: string = m.groups()[0] + '{' + m.groups()[1] + '}' + m.groups()[2]
+    
+    # Capitalize after '?' / '.', eg, Aleatory or epistemic? Does it matter? / Cogeneration planning under uncertainty. Part {II}
+    m = re.search(r'(.+?[\?\.]\s)([A-Z][a-z]*)(.*)', string)
+    if m: string = m.groups()[0] + '{' + m.groups()[1] + '}' + m.groups()[2]
+    
+    return string
 
 
 def format_output(list_of_dicts, excluded_fields=[], keep_both_doi_url=False):

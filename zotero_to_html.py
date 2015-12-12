@@ -164,8 +164,8 @@ a:hover {
                 if ">PDF</a>" in s:         buf[0] = s
                 elif ">doi</a>" in s:       buf[1] = s
                 elif ">http</a>" in s:      buf[2] = s
-                elif ">bib</a>" in s:       buf[3] = s
-                elif ">abstract</a>" in s:  buf[4] = s
+                elif ">abstract</a>" in s:  buf[3] = s
+                elif ">bib</a>" in s:       buf[4] = s
                 else:                       buf.append(s)
                 
                 if line.endswith("</a>&nbsp;]"):
