@@ -45,7 +45,7 @@ def read_bib_file(bibfile):
 def read_zotero_localhost_bib(url):
     """Export the whole Zotero library to BibTeX using Better BibTeX and then
     read the bibtex output from Zotero localhost into a list of dictionaries,
-    each dictionary has 'id' and 'raw' keys, where 'id is the citekey
+    each dictionary has 'id' and 'raw' keys, where 'id' is the citekey
     and 'raw' contains a list of all *raw* lines of the entry 'id'.
     """
     try:
@@ -74,6 +74,17 @@ def read_zotero_localhost_bib(url):
         else:
             list_of_dicts[-1]['raw'].append(line)
     return list_of_dicts
+
+
+def check_duplicate_citekeys(list_of_dicts):
+    list_of_citekeys = [item['id'] for item in list_of_dicts]
+    if len(set(list_of_citekeys)) == len(list_of_citekeys):
+        print("Perfect! No duplicate citation key.")
+    else:
+        print("There are duplicate citation keys:")
+        for citekey in set(list_of_citekeys):
+            if list_of_citekeys.count(citekey) > 1:
+                print("'%s'" % citekey, "occurs", list_of_citekeys.count(citekey), "times")
 
 
 def fix_and_split(list_of_dicts, omit_indecent_citekey=False):

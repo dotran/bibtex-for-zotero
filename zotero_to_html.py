@@ -56,9 +56,12 @@ def main():
         format_bib_html(html)
     
     # Step 5: Format the generated .bib file to remove the fields file, abstract
-    # format_bib.main(infile=outfile, outfile=outfile)
+    # format_bib.main(infile=outfile, outfile=outfile)  # this is obsolete
     bibutils.format_output(new_bib, excluded_fields=EXCLUDED_FIELDS + ('abstract', 'month', 'file'))
     bibutils.write_bib_file(new_bib, outfile)
+    
+    # Step 6 (additional): Check for any duplicate citation keys
+    bibutils.check_duplicate_citekeys(new_bib)
     
 
 def format_bib_html(html_file):
