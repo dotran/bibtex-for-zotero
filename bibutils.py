@@ -155,14 +155,25 @@ def fix_and_split(list_of_dicts, omit_indecent_citekey=False):
                     if m: value = m.groups()[0] + '--' + m.groups()[2]
                 if field == 'journal' and value == "Evol. Comput.":
                     value = "Evolutionary Computation"
+                
+                if field == 'type' and value.lower() == "phd thesis":
+                    value = "{PhD} Thesis"
+                # if field == 'edition':
+                #     value = '{' + value + '}'
+                if field in ['editor', 'author']:
+                    value = value.replace(", Prof Dr ", ", ").replace(", Professor ", ", ").replace(", Prof ", ", ").replace(", Dr ", ", ")
+               
                 if field == 'year' and len(value) != 4:
                     m = re.search(r'[1|2]\d{3}', value)
                     if m: value = m.group()
                 if field == 'file':
                     m = re.search(r':(.*\.pdf):application', value)
+                    if not m:
+                        m = re.search(r':(.*\.djvu):', value)
                     if m:
                         value = m.groups()[0]
                         value = "file://" + value.replace('\:\\\\', ':/').replace('\\\\', '/').replace('\\', '/')
+                        
                 if field == 'month':
                     if value == 'jan':   value = 'January'
                     elif value == 'feb': value = 'February'
@@ -244,14 +255,14 @@ def format_title_brackets(inpstring):
 def format_output(list_of_dicts, excluded_fields=[], keep_both_doi_url=False):
     """Create and format the data to be written out to a new .bib file
     """
-    OUTPUT_ORDER = ['author',
-                    'title',
+    OUTPUT_ORDER = ['title',
+                    'author',
                     'journal',
                     'booktitle',
                     'type',
                     'edition',
-                    'series',
                     'editor',
+                    'series',
                     'year',
                     'month',
                     'volume',
@@ -271,6 +282,22 @@ def format_output(list_of_dicts, excluded_fields=[], keep_both_doi_url=False):
     for item in list_of_dicts:
         item['outdata'] = []
         item['outdata'].append("@%s{%s," % (item['type'], item['id']))
+        #--------------------------------------------------------------------
+        # Patch the field "number" in @incollection of Springer to "volume":
+        if (item['type'] == "incollection" or item['type'] == "book") and \
+           'publisher' in item['data'].keys() and any(p in item['data']['publisher'] for p in ["Springer", "Verlag"]) and \
+           'series' in item['data'].keys() and 'number' in item['data'].keys() and 'volume' not in item['data'].keys():
+            item['data']['volume'] = item['data'].pop('number')
+        
+        # Patch the field "publisher" and "address", mostly for Springer:
+        if 'publisher' in item['data'].keys():
+            if item['data']['publisher'].strip('{}') in ["Springer Berlin Heidelberg", "Springer Berlin / Heidelberg"]:
+                item['data']['publisher'] = "{Springer-Verlag}"
+                item['data']['address'] = "Berlin, Heidelberg"
+            elif "Physica-Verlag H" in item['data']['publisher']:
+                item['data']['publisher'] = "{Physica-Verlag}"
+                item['data']['address'] = "Heidelberg"
+        #--------------------------------------------------------------------
         available_fields = item['data'].keys()
         for field in OUTPUT_ORDER:
             if not available_fields: break

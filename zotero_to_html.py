@@ -16,15 +16,20 @@ from pyzotero import zotero
 import bibutils
 
 
-EXCLUDED_FIELDS = ('note', 'isbn', 'keywords', 'shorttitle', 'issn', 'copyright', 'timestamp', 'language', 'urldate')
+EXCLUDED_FIELDS = ('note', 'isbn', 'keywords', 'shorttitle', 'issn', 'copyright', 'timestamp', 'language', 'urldate', 'lccn')
 
 outfile  = "E:/RES/Lib/Bib/zbiball.bib"
 # outfile = "./biblio.bib"
+
+BIBTEX_MAX_CAPACITY = 7000
 
 def main():
     """Export the whole Zotero library to BibTeX using Better BibTeX
     and use the BibTeX2HTML tool to make nicely formatted HTML files with
     with abstracts, links, etc.
+    
+    NOTE: This is the UPDATED VERSION which splits the large bib database
+    (exceeding the Hash size of 35000) into smaller junks.
     """
     
     URL = "http://localhost:23119/better-bibtex/library?library.bibtex"
@@ -36,24 +41,159 @@ def main():
     bibutils.format_output(new_bib, excluded_fields=EXCLUDED_FIELDS, keep_both_doi_url=True)
     bibutils.write_bib_file(new_bib, outfile)
     
-    # Step 2: Use BibTeX2HTML to generate a .html from the produced .bib file
-    os.environ['TEMP'] = '.'
-    os.system("bibtex2html.exe -s plain_boldtitle -m bibtex2html_macros.tex -both -use-keys -nf file PDF -d -r %s" % (outfile))
     
-    # Step 3: Copy the generated .html files to the same folder of 'outfile'
+    # Sort the database wrt year
+    new_bib_sorted = sorted(new_bib,
+                            key=lambda k: k['data']['year'] if 'year' in k['data'].keys() else 0,
+                            reverse=True)
+    
+    # Set filename templates
     bib_file = os.path.basename(outfile)
-    html_file = bib_file[:-4] + ".html"
-    html_abstracts_file = bib_file[:-4] + "_abstracts.html"
-    html_bib_file = bib_file[:-4] + "_bib.html"
-    if os.path.dirname(outfile) != '.':
-        for f in [html_file, html_abstracts_file, html_bib_file]:
-            shutil.copyfile(f, os.path.join(os.path.dirname(outfile), f))
-            os.remove(f)
+    html_file = bib_file[:-4] + "%s.html"
+    html_abstracts_file = bib_file[:-4] + "%s_abstracts.html"
+    html_bib_file = bib_file[:-4] + "%s_bib.html"
     
-    # Step 4: Customize the .html files
+    
+    number_of_batches, remainder = divmod(len(new_bib_sorted), BIBTEX_MAX_CAPACITY)
+    
+    # Process each single batch
+    for i in xrange(number_of_batches):
+        bibutils.write_bib_file(new_bib_sorted[i*BIBTEX_MAX_CAPACITY : (i+1)*BIBTEX_MAX_CAPACITY], outfile)
+        
+        # Step 2: Use BibTeX2HTML to generate a .html from the produced .bib file
+        os.environ['TEMP'] = '.'
+        os.system("bibtex2html.exe -s plain_boldtitle -m bibtex2html_macros.tex -both -use-keys -nf file PDF -d -r %s" % (outfile))
+        
+        # Step 3: Customize the .html files
+        for html in [html_file, html_abstracts_file, html_bib_file]:
+            format_bib_html(html % '')
+        
+        # Step 4: Copy the generated .html files to the same folder of 'outfile'
+        if os.path.dirname(outfile) != '.':
+            for f in [html_file, html_abstracts_file, html_bib_file]:
+                shutil.copyfile(f % '', os.path.join(os.path.dirname(outfile), f % str(i if remainder or number_of_batches >= 2 else '')))
+                os.remove(f % '')
+    
+    # Process the remaining entries that did not constitute a whole batch
+    if remainder:
+        bibutils.write_bib_file(new_bib_sorted[number_of_batches*BIBTEX_MAX_CAPACITY : ], outfile)
+        
+        # Step 2: Use BibTeX2HTML to generate a .html from the produced .bib file
+        os.environ['TEMP'] = '.'
+        os.system("bibtex2html.exe -s plain_boldtitle -m bibtex2html_macros.tex -both -use-keys -nf file PDF -d -r %s" % (outfile))
+        
+        # Step 3: Customize the .html files
+        for html in [html_file, html_abstracts_file, html_bib_file]:
+            format_bib_html(html % '')
+        
+        # Step 4: Copy the generated .html files to the same folder of 'outfile'
+        if os.path.dirname(outfile) != '.':
+            for f in [html_file, html_abstracts_file, html_bib_file]:
+                shutil.copyfile(f % '', os.path.join(os.path.dirname(outfile), f % str(number_of_batches if number_of_batches >= 1 else '')))
+                os.remove(f % '')
+    
+    # Join the separate HTLM files if they have multiple parts
     os.chdir(os.path.dirname(outfile))
-    for html in [html_file, html_abstracts_file, html_bib_file]:
-        format_bib_html(html)
+    if number_of_batches >= 2 or (number_of_batches == 1 and remainder):
+        number_of_files = number_of_batches + 1 if remainder else number_of_batches
+        f1 = open(html_file % '', 'wb')
+        f2 = open(html_abstracts_file % '', 'wb')
+        f3 = open(html_bib_file % '', 'wb')
+        for i in xrange(number_of_files):
+            f1_i = open(html_file % str(i), 'rb')
+            f2_i = open(html_abstracts_file % str(i), 'rb')
+            f3_i = open(html_bib_file % str(i), 'rb')
+            
+            # First part
+            if i == 0:
+                for line in f1_i.readlines():
+                    if line.splitlines()[0] != "</table>":
+                        f1.write(line)
+                    else:
+                        f1.write('\n')
+                        break
+                for line in f2_i.readlines():
+                    if line.splitlines()[0] != "</table>":
+                        f2.write(line)
+                    else:
+                        f2.write('\n')
+                        break
+                for line in f3_i.readlines():
+                    if line.splitlines()[0] != "</body>":
+                        f3.write(line)
+                    else:
+                        f3.write('\n')
+                        break
+            
+            # Last part
+            elif i == number_of_files - 1:
+                WRITING = False
+                for line in f1_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<table>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        f1.write(line)
+                WRITING = False
+                for line in f2_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<table>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        f2.write(line)
+                WRITING = False
+                for line in f3_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<body>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        f3.write(line)
+            
+            # Middle parts
+            else:
+                WRITING = False
+                for line in f1_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<table>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        if line.splitlines()[0] == "</table>":
+                            f1.write('\n')
+                            break
+                        f1.write(line)
+                WRITING = False
+                for line in f2_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<table>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        if line.splitlines()[0] == "</table>":
+                            f2.write('\n')
+                            break
+                        f2.write(line)
+                WRITING = False
+                for line in f3_i.readlines():
+                    if not WRITING and line.splitlines()[0] == "<body>":
+                        WRITING = True
+                        continue
+                    if WRITING:
+                        if line.splitlines()[0] == "</body>":
+                            f3.write('\n')
+                            break
+                        f3.write(line)
+            
+            f1_i.close()
+            f2_i.close()
+            f3_i.close()
+            
+            # Remove partial files that have been read
+            for f in [html_file, html_abstracts_file, html_bib_file]:
+                os.remove(f % str(i))
+            
+        f1.close()
+        f2.close()
+        f3.close()
+    
     
     # Step 5: Format the generated .bib file to remove the fields file, abstract
     # format_bib.main(infile=outfile, outfile=outfile)  # this is obsolete
