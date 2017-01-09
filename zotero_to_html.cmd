@@ -1,3 +1,3 @@
 @echo off
-python zotero_to_html.py %*
+py zotero_to_html.py %*
 pause
