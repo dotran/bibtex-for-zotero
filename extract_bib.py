@@ -15,8 +15,41 @@ import pprint
 
 EXTRACT_ON_BIB_FILE_BASIC = False  # set to False to extract using the order as in
                                    # the .bbl file (the order of \bibcite's in .aux)
-EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
-# EXCLUDED_FIELDS = ('abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')  # for CV only
+EXCLUDED_FIELDS = (
+    'note',
+    'isbn',
+    'abstract',
+    'month',
+    'file',
+    'urldate',
+    'keywords',
+    'shorttitle',
+    'issn',
+    'copyright',
+    'timestamp',
+    'language',
+    'lccn',
+    'pmid',
+    'pmcid',
+    'dateadded')
+
+EXCLUDED_FIELDS = (  # for CV only
+    # 'note',
+    # 'isbn',
+    'abstract',
+    'month',
+    'file',
+    'urldate',
+    'keywords',
+    'shorttitle',
+    'issn',
+    'copyright',
+    'timestamp',
+    'language',
+    'lccn',
+    'pmid',
+    'pmcid',
+    'dateadded')
 
 def main():
     """
