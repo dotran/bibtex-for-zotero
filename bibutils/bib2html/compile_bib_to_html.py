@@ -46,7 +46,7 @@ def compile_bib_to_html(bib_chunk, chunk_idx=None, path=None, filename=None):
         path = os.path.join(os.getcwd(), "output")
     else:
         path = os.path.abspath(path)
-    if not os.path.exists(path):
+    if not os.path.isdir(path):
         os.makedirs(path)
     
     if not filename:
