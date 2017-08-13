@@ -78,7 +78,7 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     
     bibutils.format_output(bib,
                            excluded_fields=EXCLUDED_FIELDS,
-                           keep_both_doi_url=True)
+                           keep_both_doi_url=False)
     
     bibutils.write_bib_file(bib, output_file)
     
