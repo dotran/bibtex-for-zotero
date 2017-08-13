@@ -12,7 +12,7 @@ from .read_bib_file import cut_into_list_of_dicts, eliminate_indecent_citekeys
 from .parse_bib import parse_bib
 
 
-def read_zotero_localhost_bib(url, omit_indecent_citekey=False, verbose=False):
+def read_zotero_localhost(url, omit_indecent_citekey=False, verbose=True):
     """Export the whole Zotero library to BibTeX using Better BibTeX and then
     read the bibtex output from Zotero localhost into a list of dictionaries,
     each dictionary has 'id' and 'raw' keys, where 'id' is the citekey

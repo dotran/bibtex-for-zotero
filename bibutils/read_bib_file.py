@@ -10,7 +10,7 @@ import re
 from .parse_bib import parse_bib
 
 
-def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=False):
+def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=True):
     """
     Read a bibliography .bib file into a list of dictionaries
     

@@ -5,18 +5,20 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
+import sys
 import time
 import bibutils
 
 
+DEFAULT_URL     = "http://localhost:23119/better-bibtex/collection?/0/7CJV7E9Q.biblatex"
+DEFAULT_OUTPUT  = "./biblio.bib"
 EXCLUDED_FIELDS = (
     'note',
-    # 'isbn',
-    # 'abstract',
-    # 'month',
-    # 'file',
-    # 'urldate',
+    'isbn',
+    'abstract',
+    'month',
+    'file',
+    'urldate',
     'keywords',
     'shorttitle',
     'issn',
@@ -28,11 +30,8 @@ EXCLUDED_FIELDS = (
     'pmcid',
     'dateadded')
 
-outfile  = "./newtest/testlib.bib"
-# outfile  = "E:\\RES\\Lib\\Bib\\zbiball.bib"
 
-
-def read_zotero_to_bib(zotero_localhost_url):
+def zotero_to_bib(zotero_localhost_url, output_file):
     """
     Export the whole Zotero library (or a collection) to BibTeX using Better
     BibTeX and use the BibTeX2HTML tool to make nicely formatted HTML files with
@@ -69,30 +68,58 @@ def read_zotero_to_bib(zotero_localhost_url):
     Ref: https://github.com/retorquere/zotero-better-bibtex/wiki/Scripting
     """
     
-    bib = bibutils.read_zotero_localhost_bib(zotero_localhost_url)
-    bibutils.fix_and_split(bib, omit_indecent_citekey=True)
+    bib = bibutils.read_zotero_localhost(url=zotero_localhost_url,
+                                         omit_indecent_citekey=True,
+                                         verbose=True)
     
-    # Sort by "Date Added"
-    bib = sorted(bib, key=lambda k: k['data']['dateadded'], reverse=False)
-    bibutils.format_output(bib, excluded_fields=EXCLUDED_FIELDS, keep_both_doi_url=True)
+    bib = sorted(bib,
+                 key=lambda k: k['data']['dateadded'],  # sort by "Date Added"
+                 reverse=False)
+    
+    bibutils.format_output(bib,
+                           excluded_fields=EXCLUDED_FIELDS,
+                           keep_both_doi_url=True)
+    
+    bibutils.write_bib_file(bib, output_file)
 
 
-def main():
-    # Export the whole Zotero library to BibTeX using Better BibTeX
-    URL = "http://localhost:23119/better-bibtex/library?library.bibtex"
+def parse_args(params):
+    if len(params) == 0:
+        print("No argument specified. Using the preset localhost url and output file.")
+        url = DEFAULT_URL
+        output_file = DEFAULT_OUTPUT
+    elif len(params) == 1:
+        if 'http://localhost' in params[0]:
+            url = params[0]
+            output_file = DEFAULT_OUTPUT
+        elif '.bib' in params[0]:
+            url = DEFAULT_URL
+            output_file = params[0]
+        else:
+            raise Exception("Unknown command line argument: %s" % params[0])
+    elif len(params) == 2:
+        if 'http://localhost' in params[0] and '.bib' in params[1]:
+            url = params[0]
+            output_file = params[1]
+        elif 'http://localhost' in params[1] and '.bib' in params[0]:
+            url = params[1]
+            output_file = params[0]
+        else:
+            raise Exception("Unknown command line arguments:\n\t%s\n\t%s" % (params[0], params[1]))
+    else:
+        raise Exception("Too many arguments. Two are expected: input localhost url and output file.")
     
-    # Export only a specific collection
-    # URL = "http://localhost:23119/better-bibtex/collection?/0/QBN8FDDA.bibtex"
+    url = url.replace('.biblatex', '.bibtex')
+    print("localhost_url = {arg1}\noutput_file = {arg2}".format(arg1=url, arg2=output_file))
     
-    read_zotero_to_bib(URL)
-    
-    new_bib = bibutils.read_zotero_localhost_bib(URL)
-    bibutils.fix_and_split(new_bib, omit_indecent_citekey=True)
-    bibutils.format_output(new_bib, excluded_fields=EXCLUDED_FIELDS)
-    bibutils.write_bib_file(new_bib, outfile)
+    return url, output_file
+
+
+def main(params):
+    zotero_to_bib(*parse_args(params))
 
 
 if __name__ == '__main__':
     startTime = time.time()
-    main()
+    main(sys.argv[1:])
     print('Processing done. It took: %1.2f' % (time.time() - startTime), 'seconds.')

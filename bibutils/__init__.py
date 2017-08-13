@@ -6,7 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 from .read_bib_file import read_bib_file
-from .read_zotero_localhost_bib import read_zotero_localhost_bib
+from .read_zotero_localhost import read_zotero_localhost
 from .add_new_entries_to_basebib import add_new_entries_to_basebib
 from .format_output import *
 from .check_duplicate_citekeys import check_duplicate_citekeys
