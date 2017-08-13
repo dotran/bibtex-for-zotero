@@ -9,7 +9,7 @@ import re
 import datetime
 
 
-def fix_and_split(list_of_dicts):
+def parse_bib(list_of_dicts):
     """
     list_of_dicts is a list of dictionaries, each dictionary has
         {'id': "citekey"
@@ -23,6 +23,7 @@ def fix_and_split(list_of_dicts):
     for item in list_of_dicts:
         rawdata = item['raw']
         buf = []
+        
         # Lowercase the entry type
         idx = rawdata[0].index('{')
         item['type'] = rawdata[0][1:idx].lower()
@@ -318,7 +319,7 @@ def format_title_brackets(inpstring):
     string = re.sub(r'{\(([^\s\(\){}]+?)\)}', r'({\1})', string)  # Fix for "{(MINLPs)}" or "{(MA|PM)}" or "{(I-SIBEA)}"
     string = re.sub(r'{\(([^\s\(\){}]+?)}(.+?)\)(}?)', r'({\1}\2\3)', string)  # "{(EuroGP} 2003)" or "{(P-RBF} {NNs)}"
     string = re.sub(r'{(\(.+?\)[-\s])([^\s\(\){}]+?)}', r'\1{\2}', string)  # "{(1+1)-CMA-ES}"
-    string2 = re.sub(r'(^|\s){(\w+)\?}($|\s)', r'\1{\2}?\3', string)  # "{OR?}" or "{DE?}"
+    # string = re.sub(r'(^|\s){(\w+)\?}($|\s)', r'\1{\2}?\3', string)  # "{OR?}" or "{DE?}"
     
     # Fix for " reasoning\textemdash{}I" or " {reasoning\textemdash{}II}"
     # or "Production\textendash{}distribution Problem" or or "Hybrid {VNS\textendash{}TS} Algorithm"

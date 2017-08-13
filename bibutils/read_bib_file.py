@@ -7,6 +7,8 @@ from __future__ import print_function
 
 import re
 
+from .parse_bib import parse_bib
+
 
 def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=False):
     """
@@ -24,24 +26,31 @@ def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=False):
     
     list_of_dicts = cut_into_list_of_dicts(buf)
     
-    # Omit non-official references (those without a decent citekey)
     if omit_indecent_citekey:
-        for idx, item in reversed(list(enumerate(list_of_dicts))):
-            citekey = item['id']
-            if not re.search(r'[a-z]{2,}', citekey):
-                notify_omitting(verbose, citekey)
-                del list_of_dicts[idx]
-            
-            #elif item['type'] == 'misc' and re.search(r'\+[a-z]{2,}', citekey):
-            elif re.search(r'\+[a-z]{2,}', citekey):
-                notify_omitting(verbose, citekey)
-                del list_of_dicts[idx]
-            
-            elif 'zotero-null' in citekey:
-                notify_omitting(verbose, citekey)
-                del list_of_dicts[idx]
+        eliminate_indecent_citekeys(list_of_dicts, verbose)
+    
+    parse_bib(list_of_dicts)
     
     return list_of_dicts
+
+
+def eliminate_indecent_citekeys(list_of_dicts, verbose):
+    """Omit non-official references (those without a decent citekey)
+    """
+    for idx, item in reversed(list(enumerate(list_of_dicts))):
+        citekey = item['id']
+        if not re.search(r'[a-z]{2,}', citekey):
+            notify_omitting(verbose, citekey)
+            del list_of_dicts[idx]
+        
+        #elif item['type'] == 'misc' and re.search(r'\+[a-z]{2,}', citekey):
+        elif re.search(r'\+[a-z]{2,}', citekey):
+            notify_omitting(verbose, citekey)
+            del list_of_dicts[idx]
+        
+        elif 'zotero-null' in citekey:
+            notify_omitting(verbose, citekey)
+            del list_of_dicts[idx]
 
 
 def notify_omitting(verbose, citekey):
