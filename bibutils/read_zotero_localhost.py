@@ -10,6 +10,7 @@ import requests
 
 from .read_bib_file import cut_into_list_of_dicts, eliminate_indecent_citekeys
 from .parse_bib import parse_bib
+from .check_duplicate_citekeys import check_duplicate_citekeys
 
 
 def read_zotero_localhost(url, omit_indecent_citekey=False, verbose=True):
@@ -40,5 +41,7 @@ def read_zotero_localhost(url, omit_indecent_citekey=False, verbose=True):
         eliminate_indecent_citekeys(list_of_dicts, verbose)
     
     parse_bib(list_of_dicts)
+    
+    check_duplicate_citekeys(list_of_dicts)
     
     return list_of_dicts
