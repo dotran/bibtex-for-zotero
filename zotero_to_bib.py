@@ -68,11 +68,11 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     Ref: https://github.com/retorquere/zotero-better-bibtex/wiki/Scripting
     """
     
-    bib = bibutils.read_zotero_localhost(url=zotero_localhost_url,
-                                         omit_indecent_citekey=True,
-                                         verbose=True)
+    new_bib = bibutils.read_zotero_localhost(url=zotero_localhost_url,
+                                             omit_indecent_citekey=True,
+                                             verbose=True)
     
-    bib = sorted(bib,
+    bib = sorted(new_bib,
                  key=lambda k: k['data']['dateadded'],  # sort by "Date Added"
                  reverse=False)
     
@@ -81,6 +81,8 @@ def zotero_to_bib(zotero_localhost_url, output_file):
                            keep_both_doi_url=True)
     
     bibutils.write_bib_file(bib, output_file)
+    
+    return new_bib
 
 
 def parse_args(params):
