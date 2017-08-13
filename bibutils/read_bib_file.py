@@ -8,7 +8,7 @@ from __future__ import print_function
 import re
 
 
-def read_bib_file(bibfile):
+def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=False):
     """
     Read a bibliography .bib file into a list of dictionaries
     
@@ -22,7 +22,31 @@ def read_bib_file(bibfile):
         buf = f.read().split('\n')
     buf = [line[:-1] if line.endswith('\r') else line for line in buf]  # remove '\r' in Windows files
     
-    return cut_into_list_of_dicts(buf)
+    list_of_dicts = cut_into_list_of_dicts(buf)
+    
+    # Omit non-official references (those without a decent citekey)
+    if omit_indecent_citekey:
+        for idx, item in reversed(list(enumerate(list_of_dicts))):
+            citekey = item['id']
+            if not re.search(r'[a-z]{2,}', citekey):
+                notify_omitting(verbose, citekey)
+                del list_of_dicts[idx]
+            
+            #elif item['type'] == 'misc' and re.search(r'\+[a-z]{2,}', citekey):
+            elif re.search(r'\+[a-z]{2,}', citekey):
+                notify_omitting(verbose, citekey)
+                del list_of_dicts[idx]
+            
+            elif 'zotero-null' in citekey:
+                notify_omitting(verbose, citekey)
+                del list_of_dicts[idx]
+    
+    return list_of_dicts
+
+
+def notify_omitting(verbose, citekey):
+    if verbose:
+        print("Omitting the entry with citekey '%s'" % citekey)
 
 
 def cut_into_list_of_dicts(buf):

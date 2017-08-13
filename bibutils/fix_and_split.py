@@ -9,8 +9,9 @@ import re
 import datetime
 
 
-def fix_and_split(list_of_dicts, omit_indecent_citekey=False):
-    """list_of_dicts is a list of dictionaries, each dictionary has:
+def fix_and_split(list_of_dicts):
+    """
+    list_of_dicts is a list of dictionaries, each dictionary has
         {'id': "citekey"
          'raw': ["line", "line", ...]
          'type': "article"
@@ -18,14 +19,6 @@ def fix_and_split(list_of_dicts, omit_indecent_citekey=False):
          'outdata': ["nice line", "nice line", ...]
         }
     """
-    if omit_indecent_citekey:
-        # Omit non-official references (those without a decent citekey)
-        for idx, item in reversed(list(enumerate(list_of_dicts))):
-            if not re.search(r'[a-z]{2,}', item['id']):
-                del list_of_dicts[idx]
-            #elif item['type'] == 'misc' and re.search(r'\+[a-z]{2,}', item['id']):
-            elif re.search(r'\+[a-z]{2,}', item['id']):
-                del list_of_dicts[idx]
     
     for item in list_of_dicts:
         rawdata = item['raw']
