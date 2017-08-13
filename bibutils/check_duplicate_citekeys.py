@@ -9,7 +9,7 @@ from __future__ import print_function
 def check_duplicate_citekeys(list_of_dicts):
     list_of_citekeys = [item['id'] for item in list_of_dicts]
     if len(set(list_of_citekeys)) == len(list_of_citekeys):
-        print("Perfect! No duplicate citation key.")
+        print("No duplicate citation key detected.")
     else:
         print("There are duplicate citation keys:")
         for citekey in set(list_of_citekeys):
