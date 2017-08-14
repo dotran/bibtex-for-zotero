@@ -5,6 +5,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import os
+
 from .compile_bib_to_html import compile_bib_to_html
 from .join_html_chunks import join_html_chunks
 
@@ -14,6 +16,10 @@ BIBTEX_MAX_CAPACITY = 15  # 7000
 
 def bib_to_html(bib, path=None, filename=None):
     nb_batches, remainder = divmod(len(bib), BIBTEX_MAX_CAPACITY)
+    
+    # Backup the existing bib file
+    cur_bib_file = os.path.join(path, filename.replace('.html', '.bib'))
+    bak_bib_file = backup_restore_file(cur_bib_file, 'backup')
     
     # Process each single batch
     for i in range(nb_batches):
@@ -33,3 +39,29 @@ def bib_to_html(bib, path=None, filename=None):
     if len(bib) / BIBTEX_MAX_CAPACITY > 1:
         nb_chunks = nb_batches + 1 if remainder else nb_batches
         join_html_chunks(html_files, nb_chunks)
+    
+    # Restore the backed up bib file
+    backup_restore_file(bak_bib_file, 'restore')
+
+
+def backup_restore_file(file, mode):
+    import os
+    import shutil
+    BACKUP_EXT = ".backup"
+    backup_file = file + BACKUP_EXT
+    if mode == "backup":
+        if not os.path.isfile(file):
+            print("%s does not exist. No need to backup.")
+            return None
+        else:
+            shutil.copyfile(file, backup_file)
+            # os.remove(file)
+            return backup_file
+    elif mode == "restore":
+        if not file or not os.path.isfile(file):
+            print("No file to restore.")
+        else:
+            shutil.copyfile(file, file.replace(BACKUP_EXT, ''))
+            os.remove(file)
+    else:
+        raise Exception("Unknown 'mode'.")
