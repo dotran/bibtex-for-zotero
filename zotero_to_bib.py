@@ -34,8 +34,7 @@ EXCLUDED_FIELDS = (
 def zotero_to_bib(zotero_localhost_url, output_file):
     """
     Export the whole Zotero library (or a collection) to BibTeX using Better
-    BibTeX and use the BibTeX2HTML tool to make nicely formatted HTML files with
-    with abstracts, links, etc.
+    BibTeX.
     
     NOTE #1:
     I decided to use the Zotero localhost utility along with Better BibTeX, as
@@ -45,10 +44,6 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     
     [see, http://www.texmacs.org/tmweb/miguel/task-zotero.en.html
           https://github.com/smathot/qnotero/blob/master/libzotero/libzotero.py]
-    
-    NOTE #2:
-    This is the UPDATED VERSION which splits the large bib database (exceeding
-    the Hash size of 35000) into smaller junks.
     
     UPDATE:
     To sort the bib wrt "Date Added", we must have access to this field, which
@@ -85,7 +80,7 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     return new_bib
 
 
-def parse_args(params):
+def parse_args(params, ext='.bib'):
     if len(params) == 0:
         print("No argument specified. Using the preset localhost url and output file.")
         url = DEFAULT_URL
@@ -94,16 +89,16 @@ def parse_args(params):
         if 'http://localhost' in params[0]:
             url = params[0]
             output_file = DEFAULT_OUTPUT
-        elif '.bib' in params[0]:
+        elif ext in params[0]:
             url = DEFAULT_URL
             output_file = params[0]
         else:
             raise Exception("Unknown command line argument: %s" % params[0])
     elif len(params) == 2:
-        if 'http://localhost' in params[0] and '.bib' in params[1]:
+        if 'http://localhost' in params[0] and ext in params[1]:
             url = params[0]
             output_file = params[1]
-        elif 'http://localhost' in params[1] and '.bib' in params[0]:
+        elif 'http://localhost' in params[1] and ext in params[0]:
             url = params[1]
             output_file = params[0]
         else:
