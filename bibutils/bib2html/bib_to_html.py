@@ -11,7 +11,7 @@ from .compile_bib_to_html import compile_bib_to_html
 from .join_html_chunks import join_html_chunks
 
 
-BIBTEX_MAX_CAPACITY = 15  # 7000
+BIBTEX_MAX_CAPACITY = 7000
 
 
 def bib_to_html(bib, path=None, filename=None):
