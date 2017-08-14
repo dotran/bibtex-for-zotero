@@ -1,3 +1,11 @@
+# All folders except the specified one
+/*/
+!/bibutils
+
+# All generated bib and html files
+*.bib
+*.html
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
