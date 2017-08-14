@@ -77,9 +77,9 @@ def bib_to_html(bib, output_file):
                            excluded_fields=EXCLUDED_FIELDS,
                            keep_both_doi_url=True)
     
-    bibutils.bib_to_html(bib,
-                         path=os.path.dirname(output_file),
-                         filename=os.path.basename(output_file))
+    bibutils.bib2html(bib,
+                      path=os.path.dirname(output_file),
+                      filename=os.path.basename(output_file))
 
 
 def main(params):
