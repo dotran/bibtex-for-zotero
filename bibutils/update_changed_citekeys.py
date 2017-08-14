@@ -5,28 +5,29 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
-import shutil
 import time
-import csv
 import re
-import copy
-import pprint
+# import pprint
 
 
-diff_file   = "E:/RES/Lib/Bib/bibchanges.diff"
-tex_infile  = "E:/INRIA/thesis-temp/10-introduction.tex"
-tex_outfile = "E:/INRIA/thesis-temp/10-introduction_keysfixed.tex"
+bib_diff_file   = "E:/RES/Lib/Bib/bibchanges.diff"
+input_tex_file  = "E:/INRIA/thesis-temp/10-introduction.tex"
+output_tex_file = "E:/INRIA/thesis-temp/10-introduction_keysfixed.tex"
+
 
 def main():
-    """Export the whole Zotero library to BibTeX using Better BibTeX
-    and use the BibTeX2HTML tool to make nicely formatted HTML files with
-    with abstracts, links, etc.
     """
-    citekey_changes = read_citekey_changes_from_diff_file(diff_file)
+    This script updates the citekeys for references that were cited in a TEX
+    document but unfortunately their citekeys in the BIB file undergo some
+    changes later on due to citekey regeneration. Two versions of the BIB file
+    are used to produce a DIFF which plays as a mapping between old and new
+    citekeys for any references having citekey changed.
+    """
+    citekey_changes = read_citekey_changes_from_diff(bib_diff_file)
     # pprint.pprint(citekey_changes)
     print(len(citekey_changes))
-    with open(tex_infile, 'rb') as f:
+    
+    with open(input_tex_file, 'rb') as f:
         doc = f.read()
     # print(doc[:200])
     print(type(doc))
@@ -37,12 +38,12 @@ def main():
         # print(pattern)
         doc = re.sub(pattern, key['new'], doc)
     
-    with open(tex_outfile, 'wb') as f:
+    with open(output_tex_file, 'wb') as f:
         f.write(doc)
 
 
-def read_citekey_changes_from_diff_file(diffFile):
-    with open(diffFile, 'rb') as f:
+def read_citekey_changes_from_diff(diff_file):
+    with open(diff_file, 'rb') as f:
         buf = f.read().split('\n')
     buf = [line[:-1] if line.endswith('\r') else line for line in buf]  # remove '\r' in Windows files
     
@@ -51,9 +52,9 @@ def read_citekey_changes_from_diff_file(diffFile):
     old_citekeys = []
     new_citekeys = []
     for idx, line in enumerate(buf):
-        if line.startswith('-@') and buf[idx+1].startswith('+@'):
+        if line.startswith('-@') and buf[idx + 1].startswith('+@'):
             old_citekeys.append(extract_citekey(line))
-            new_citekeys.append(extract_citekey(buf[idx+1]))
+            new_citekeys.append(extract_citekey(buf[idx + 1]))
     
     citekey_changes = []
     for old, new in zip(old_citekeys, new_citekeys):
