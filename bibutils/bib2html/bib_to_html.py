@@ -27,14 +27,14 @@ def bib_to_html(bib, path=None, filename=None):
     for i in range(nb_batches):
         sta_idx = i * BIBTEX_MAX_CAPACITY
         end_idx = sta_idx + BIBTEX_MAX_CAPACITY
-        chunk_idx = i if len(bib) / BIBTEX_MAX_CAPACITY > 1 else ''
+        chunk_idx = i if len(bib) / BIBTEX_MAX_CAPACITY > 1 else None
         html_files = compile_bib_to_html(bib[sta_idx:end_idx], chunk_idx, path, filename)
     
     # Process the remaining entries that did not constitute a whole batch
     if remainder:
         sta_idx = nb_batches * BIBTEX_MAX_CAPACITY
         end_idx = len(bib) + 1
-        chunk_idx = nb_batches if len(bib) > BIBTEX_MAX_CAPACITY else ''
+        chunk_idx = nb_batches if len(bib) > BIBTEX_MAX_CAPACITY else None
         html_files = compile_bib_to_html(bib[sta_idx:end_idx], chunk_idx, path, filename)
     
     # Join the separate HTLM files if they have multiple parts
