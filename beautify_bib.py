@@ -35,9 +35,13 @@ def beautify_bib(new_bib):
     Reads a BIB file and re-format it to create a cleaner and nicer version.
     You only need to specify the input and output bib files.
     """
-    bib = sorted(new_bib,
-                 key=lambda k: k['data']['dateadded'],  # sort by "Date Added"
-                 reverse=False)
+    try:
+        bib = sorted(new_bib,
+                     key=lambda k: k['data']['dateadded'],  # sort by "Date Added"
+                     reverse=False)
+    except KeyError:
+        print("WARNING: Absent 'dateadded' field ==> Sorting skipped.")
+        bib = new_bib
     
     bibutils.format_output(bib,
                            excluded_fields=EXCLUDED_FIELDS,
