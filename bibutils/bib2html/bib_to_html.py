@@ -48,20 +48,23 @@ def backup_restore_file(file, mode):
     import os
     import shutil
     BACKUP_EXT = ".backup"
-    backup_file = file + BACKUP_EXT
     if mode == "backup":
         if not os.path.isfile(file):
             print("%s does not exist. No need to backup.")
             return None
         else:
+            backup_file = file + BACKUP_EXT
             shutil.copyfile(file, backup_file)
+            print("Backup '%s'" % file)
             # os.remove(file)
             return backup_file
     elif mode == "restore":
         if not file or not os.path.isfile(file):
             print("No file to restore.")
         else:
-            shutil.copyfile(file, file.replace(BACKUP_EXT, ''))
+            original_file = file.replace(BACKUP_EXT, '')
+            shutil.copyfile(file, original_file)
+            print("Restore '%s'" % original_file)
             os.remove(file)
     else:
         raise Exception("Unknown 'mode'.")
