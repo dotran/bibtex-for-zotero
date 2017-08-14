@@ -14,4 +14,4 @@ from .parse_bib import parse_bib
 from .format_html import format_html
 from .join_html_chunks import join_html_chunks
 from .bib2html import bib_to_html
-from .bib2html import compile_bib_to_html
+from .bib2html import compile_html
