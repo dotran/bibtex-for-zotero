@@ -80,7 +80,8 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     return new_bib
 
 
-def parse_args(params, ext='.bib'):
+def parse_args(params, ext=['.bib', '.html']):
+    import os
     if len(params) == 0:
         print("No argument specified. Using the preset localhost url and output file.")
         url = DEFAULT_URL
@@ -89,16 +90,16 @@ def parse_args(params, ext='.bib'):
         if 'http://localhost' in params[0]:
             url = params[0]
             output_file = DEFAULT_OUTPUT
-        elif ext in params[0]:
+        elif any(x in params[0] for x in ext):
             url = DEFAULT_URL
             output_file = params[0]
         else:
             raise Exception("Unknown command line argument: %s" % params[0])
     elif len(params) == 2:
-        if 'http://localhost' in params[0] and ext in params[1]:
+        if 'http://localhost' in params[0] and any(x in params[1] for x in ext):
             url = params[0]
             output_file = params[1]
-        elif 'http://localhost' in params[1] and ext in params[0]:
+        elif 'http://localhost' in params[1] and any(x in params[0] for x in ext):
             url = params[1]
             output_file = params[0]
         else:
@@ -109,7 +110,7 @@ def parse_args(params, ext='.bib'):
     url = url.replace('.biblatex', '.bibtex')
     print("localhost_url = {arg1}\noutput_file = {arg2}".format(arg1=url, arg2=output_file))
     
-    return url, output_file
+    return url, os.path.splitext(output_file)[0]
 
 
 def main(params):

@@ -46,7 +46,7 @@ import sys
 import time
 import bibutils
 
-from .zotero_to_bib import parse_args, zotero_to_bib
+from zotero_to_bib import parse_args, zotero_to_bib
 
 
 EXCLUDED_FIELDS = (
@@ -83,9 +83,9 @@ def bib_to_html(bib, output_file):
 
 
 def main(params):
-    url, output_html = parse_args(params, ext='.html')
-    new_bib = zotero_to_bib(url, output_html.replace('.html', '.bib'))
-    bib_to_html(new_bib, output_html)
+    url, output_file = parse_args(params)
+    new_bib = zotero_to_bib(url, output_file)
+    bib_to_html(new_bib, output_file)
 
 
 if __name__ == '__main__':

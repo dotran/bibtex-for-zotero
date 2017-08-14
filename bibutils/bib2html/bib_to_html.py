@@ -15,6 +15,8 @@ BIBTEX_MAX_CAPACITY = 15  # 7000
 
 
 def bib_to_html(bib, path=None, filename=None):
+    if not filename.endswith('.html'):
+        filename = filename + '.html'
     nb_batches, remainder = divmod(len(bib), BIBTEX_MAX_CAPACITY)
     
     # Backup the existing bib file

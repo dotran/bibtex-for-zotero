@@ -103,6 +103,12 @@ def format_output(list_of_dicts, excluded_fields=[], keep_both_doi_url=False):
 def write_bib_file(list_of_bibs, outfile):
     """Write the extracted bib data to file
     """
+    import os
+    if not outfile.endswith('.bib'):
+        outfile = outfile + '.bib'
+    parent_dir = os.path.dirname(os.path.abspath(outfile))
+    if not os.path.isdir(parent_dir):
+        os.makedirs(parent_dir)
     with open(outfile, 'wb') as f:
         for record in list_of_bibs:
             # f.write(os.linesep)
