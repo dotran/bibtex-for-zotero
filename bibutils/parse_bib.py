@@ -237,6 +237,12 @@ def parse_bib(list_of_dicts):
                     if m and not m.groups()[0].endswith(" vs. "):
                         value = m.groups()[0] + '{' + m.groups()[1] + '}' + m.groups()[2]
                 
+                    # For some unknown reason {{AI}} should be fixed to {AI}
+                    if '{{' in value:
+                        value = re.sub(r'(^|\s){{([^\s]+)}}(\s|\:|$)', r'\1{\2}\3', value)
+                    if '{({' in value:
+                        value = re.sub(r'(^|\s){\({([^\s]+)}\)}(\s|\:|$)', r'\1({\2})\3', value)
+                
                 if field == 'booktitle':
                     # Drop unnecessary brackets
                     if value and '{' in value:
