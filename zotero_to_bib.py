@@ -7,28 +7,13 @@ from __future__ import absolute_import
 
 import sys
 import time
+
 import bibutils
+from beautify_bib import beautify_bib
 
 
-DEFAULT_URL     = "http://localhost:23119/better-bibtex/collection?/0/7CJV7E9Q.biblatex"
-DEFAULT_OUTPUT  = "./biblio.bib"
-EXCLUDED_FIELDS = (
-    'note',
-    'isbn',
-    'abstract',
-    'month',
-    'file',
-    'urldate',
-    'keywords',
-    'shorttitle',
-    'issn',
-    'copyright',
-    'timestamp',
-    'language',
-    'lccn',
-    'pmid',
-    'pmcid',
-    'dateadded')
+DEFAULT_URL    = "http://localhost:23119/better-bibtex/collection?/0/7CJV7E9Q.biblatex"
+DEFAULT_OUTPUT = "./biblio.bib"
 
 
 def zotero_to_bib(zotero_localhost_url, output_file):
@@ -66,15 +51,7 @@ def zotero_to_bib(zotero_localhost_url, output_file):
     new_bib = bibutils.read_zotero_localhost(url=zotero_localhost_url,
                                              omit_indecent_citekey=True,
                                              verbose=True)
-    
-    bib = sorted(new_bib,
-                 key=lambda k: k['data']['dateadded'],  # sort by "Date Added"
-                 reverse=False)
-    
-    bibutils.format_output(bib,
-                           excluded_fields=EXCLUDED_FIELDS,
-                           keep_both_doi_url=False)
-    
+    bib = beautify_bib(new_bib)
     bibutils.write_bib_file(bib, output_file)
     
     return new_bib
