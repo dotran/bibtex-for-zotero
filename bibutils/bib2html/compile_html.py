@@ -23,7 +23,7 @@ MACRO_FILE = 'bibtex2html_macros.tex'
 DEFAULT_OUTPUT_FILENAME = "biblio"
 
 
-def compile_bib_to_html(bib_chunk, chunk_idx=None, path=None, filename=None):
+def compile_html(bib_chunk, chunk_idx=None, path=None, filename=None):
     """
     Run bibtex2html on a chunk of bib which is limited by its max capacity of
     7000 entries
