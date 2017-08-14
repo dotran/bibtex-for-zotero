@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import re
 
 from .parse_bib import parse_bib
@@ -20,12 +21,14 @@ def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=True):
             {'id' :  citekey,
              'raw': a list of all *raw* lines of the entry identified by 'id'}
     """
-    
+    if not os.path.isfile(bibfile):
+        raise Exception("File to read not found:\n\t\%s" % bibfile)
     with open(bibfile, 'rb') as f:
         buf = f.read().split('\n')
     buf = [line[:-1] if line.endswith('\r') else line for line in buf]  # remove '\r' in Windows files
     
     list_of_dicts = cut_into_list_of_dicts(buf)
+    print("Read %d entries from '%s'" % (len(list_of_dicts), bibfile))
     
     if omit_indecent_citekey:
         eliminate_indecent_citekeys(list_of_dicts, verbose)
@@ -34,6 +37,7 @@ def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=True):
     
     check_duplicate_citekeys(list_of_dicts)
     
+    print("    %d decent entries extracted from '%s'" % (len(list_of_dicts), bibfile))
     return list_of_dicts
 
 
@@ -58,7 +62,7 @@ def eliminate_indecent_citekeys(list_of_dicts, verbose):
 
 def notify_omitting(verbose, citekey):
     if verbose:
-        print("Omitting the entry with citekey '%s'" % citekey)
+        print("    Omitting entry '%s'" % citekey)
 
 
 def cut_into_list_of_dicts(buf):

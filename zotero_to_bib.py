@@ -85,7 +85,7 @@ def parse_args(params, ext=['.bib', '.html']):
         raise Exception("Too many arguments. Two are expected: input localhost url and output file.")
     
     url = url.replace('.biblatex', '.bibtex')
-    print("localhost_url = {arg1}\noutput_file = {arg2}".format(arg1=url, arg2=output_file))
+    print("\nlocalhost_url = {arg1}\noutput_file = {arg2}\n".format(arg1=url, arg2=output_file))
     
     return url, os.path.splitext(output_file)[0]
 
@@ -97,4 +97,4 @@ def main(params):
 if __name__ == '__main__':
     startTime = time.time()
     main(sys.argv[1:])
-    print('Processing done. It took: %1.2f' % (time.time() - startTime), 'seconds.')
+    print('Processing done in %1.2f' % (time.time() - startTime), 'seconds.')

@@ -70,7 +70,7 @@ def parse_args(params, ext=['.bib', '.html']):
     
     if not os.path.isfile(input_file):
         raise Exception("Non-existing input bib file '%s'" % input_file)
-    print("input_bib = {arg1}\noutput_file = {arg2}".format(arg1=input_file, arg2=output_file))
+    print("\ninput_bib = {arg1}\noutput_file = {arg2}\n".format(arg1=input_file, arg2=output_file))
     
     return input_file, os.path.splitext(output_file)[0]
 
@@ -87,4 +87,4 @@ def main(params):
 if __name__ == '__main__':
     startTime = time.time()
     main(sys.argv[1:])
-    print('Processing done. It took: %1.2f' % (time.time() - startTime), 'seconds.')
+    print('Processing done in %1.2f' % (time.time() - startTime), 'seconds.')

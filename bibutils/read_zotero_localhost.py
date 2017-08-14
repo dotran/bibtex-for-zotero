@@ -36,6 +36,7 @@ def read_zotero_localhost(url, omit_indecent_citekey=False, verbose=True):
     buf = [line[:-1] if line.endswith('\r') else line for line in buf]  # remove '\r' in Windows files
     
     list_of_dicts = cut_into_list_of_dicts(buf)
+    print("Read %d entries from Zotero '%s'" % (len(list_of_dicts), url))
     
     if omit_indecent_citekey:
         eliminate_indecent_citekeys(list_of_dicts, verbose)

@@ -5,113 +5,81 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
+import sys
 import time
-import csv
-import re
-import copy
-import pprint
-from pyzotero import zotero
+
 import bibutils
+from beautify_bib import beautify_bib
 
 
-EXCLUDED_FIELDS = ('note', 'isbn', 'abstract', 'keywords', 'month', 'shorttitle', 'issn', 'copyright', 'file', 'timestamp', 'language', 'urldate')
+DEFAULT_URL = "http://localhost:23119/better-bibtex/collection?/0/7CJV7E9Q.biblatex"
 
-infile  = "E:\\RES\\Lib\\Bib\\JabRef\\allZotero.bib"
-outfile = "./biblio.bib"
 
-def main():
+def add_new_zotero_entries_to_bib(zotero_localhost_url, input_file, output_file=None):
     """
-    This script will read your persistent/long-running bib database and then
-    pull new entries from your Zotero to create a joint, newer bib file.
+    This script will read your persistent/long-running BIB database and then
+    pull new entries from your Zotero to create a joint, newer BIB file.
     
-    You need to specify your existing .bib database as a base bib database
-    and specify the output .bib file to store the new database.
-    
-    Note: As it is time consuming to pull items from the Zotero Web API
-    (either with HTTP request or with the help of the "pyzotero" library),
-    and it is also tough (yet possible) to read from the local "zotero.sqlite"
-    [see, http://www.texmacs.org/tmweb/miguel/task-zotero.en.html
-          https://github.com/smathot/qnotero/blob/master/libzotero/libzotero.py]
-    I decided to use the Zotero localhost utility along with Better BibTeX.
+    You need to specify your existing BIB database as a base bib and specify
+    the output BIB file to store the new database.
     """
+    new_bib = bibutils.read_zotero_localhost(url=zotero_localhost_url,
+                                             omit_indecent_citekey=True,
+                                             verbose=True)
+    new_bib = beautify_bib(new_bib)
     
-    # Export the whole Zotero library to BibTeX using Better BibTeX
-    URL = "http://localhost:23119/better-bibtex/library?library.bibtex"
-    # URL = "http://localhost:23119/better-bibtex/collection?/0/QBN8FDDA.bibtex"
+    bib = bibutils.read_bib_file(input_file)
+    bibutils.add_new_entries_to_basebib(base_bib=bib, new_bib=new_bib)
     
-    new_bib = bibutils.read_zotero_localhost_bib(URL)
-    bibutils.fix_and_split(new_bib, omit_indecent_citekey=True)
-    bibutils.format_output(new_bib, excluded_fields=EXCLUDED_FIELDS)
-    
-    bib_data = bibutils.read_bib_file(infile)
-    bibutils.fix_and_split(bib_data)
-    bibutils.format_output(bib_data)
-    
-    bibutils.add_new_entries_to_basebib(basebib=bib_data, newbib=new_bib)
-    bibutils.write_bib_file(bib_data, outfile)
-    
-    """
-    # Using pyzotero library, instead of making direct HTTP request to Zotero Web API
-    zot = zotero.Zotero(library_id='1123907',
-                        library_type='user',
-                        api_key='E2DDvV8ONTGhpSBsL3S2YCPs')
-    # zot.add_parameters(format='bibtex', sort='dateAdded', direction='desc', limit=100, start=3000)
-    # items = zot.top()
-    # print(items[-1000:])
-    # pprint.pprint(items[-1]['data'])
-    """
-    # max_limit = 100
-    # i = 0
-    # raw_data = ""
-    # while i >= 0:
-    #     """
-    #     # Using pyzotero library, instead of making direct HTTP request to Zotero Web API
-    #     zot.add_parameters(format='bibtex', sort='dateAdded', direction='desc', limit=max_limit, start=i*max_limit)
-    #     buf = zot.top()
-    #     """
-    #     buf = request_to_zotero_web_api(limit=max_limit, start=i*max_limit)
-    #     raw_data = raw_data + '\n' + buf
-    #     print(i)
-    #     i = i + 1 if buf else -1
-    # # Write to text file
-    # with open('zotero_web_api.bib', 'wb') as f:
-    #     f.write(raw_data)
-    
+    bibutils.write_bib_file(beautify_bib(bib), output_file)
 
-def request_to_zotero_web_api(limit, start):
-    import requests
-    # URL = 'https://api.zotero.org/users/1123907/items?format=bibtex&v=3&key=E2DDvV8ONTGhpSBsL3S2YCPs'
-    base_URL     = 'https://api.zotero.org'
-    library_type = 'user'
-    library_id   = '1123907'
-    api_key      = 'E2DDvV8ONTGhpSBsL3S2YCPs'
-    
-    http_header = {'Zotero-API-Version': 3,
-                   'Authorization'     : 'Bearer %s' % api_key}
-    
-    prefix = '/%ss/%s/items' % (library_type, library_id)
-    params = '?format=bibtex&sort=dateAdded&direction=asc&limit=%d&start=%d' % (limit, start)
-    URL = base_URL + prefix + params
-    
-    try:
-        req = requests.get(URL, headers=http_header)
-        if req.status_code == 200:
-            # print("Successfull request")
-            pass
+
+def parse_args(params, ext='.bib'):
+    import os
+    if len(params) == 0:
+        raise Exception("No argument specified. Expected a localhost url and an input bib.")
+    elif len(params) == 1:
+        if 'http://localhost' in params[0]:
+            raise Exception("Missing an input bib file.")
+        elif ext in params[0]:
+            url = DEFAULT_URL
+            input_file = params[0]
+            output_file = input_file
         else:
-            print("Request failed (%d): %s" % (req.status_code, req.content))
-    except requests.ConnectionError:
-        print("Connection failed!")
-        exit()
+            raise Exception("Unknown command line argument: %s" % params[0])
+    elif len(params) == 2:
+        if 'http://localhost' in params[0] and ext in params[1]:
+            url = params[0]
+            input_file = params[1]
+            output_file = input_file
+        elif 'http://localhost' in params[1] and ext in params[0]:
+            url = params[1]
+            input_file = params[0]
+            output_file = input_file
+        else:
+            raise Exception("Unknown command line arguments:\n\t%s\n\t%s" % (params[0], params[1]))
+    elif len(params) == 3:
+        assert 'http://localhost' in params[0] and ext in params[1] and ext in params[2], \
+               "Unknown command line arguments"
+        url = params[0]
+        input_file = params[1]
+        output_file = params[2]
+    else:
+        raise Exception("Too many arguments. Two are expected: input localhost url and output file.")
     
-    # print(req.content)
-    # print(len(req.content))
-    string_data = req.content
-    return string_data
+    url = url.replace('.biblatex', '.bibtex')
+    if not os.path.isfile(input_file):
+        raise Exception("Non-existing input bib file '%s'" % input_file)
+    print("\nlocalhost_url = %s\ninput_file = %s\noutput_file = %s\n" % (url, input_file, output_file))
+    
+    return url, input_file, output_file
+
+
+def main(params):
+    add_new_zotero_entries_to_bib(*parse_args(params))
 
 
 if __name__ == '__main__':
     startTime = time.time()
-    main()
-    print('Processing done. It took: %1.2f' % (time.time() - startTime), 'seconds.')
+    main(sys.argv[1:])
+    print('Processing done in %1.2f' % (time.time() - startTime), 'seconds.')

@@ -309,4 +309,4 @@ def read_bib_database(bibfile):
 if __name__ == '__main__':
     startTime = time.time()
     main()
-    # print('Processing done. It took: %1.2f' % (time.time() - startTime), 'seconds.')
+    print('Processing done in %1.2f' % (time.time() - startTime), 'seconds.')
