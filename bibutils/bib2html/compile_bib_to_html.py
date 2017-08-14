@@ -85,7 +85,7 @@ def compile_bib_to_html(bib_chunk, chunk_idx=None, path=None, filename=None):
               # " --suffix string" +       # give an alternate suffix string for both HTML files and links (default is .html)
               # " --print-keys" +          # print the BibTeX entries on the standard output (one per line), as selected and sorted by bibtex2html
               # " --ignore-errors" +       # ignore BibTeX errors
-              # " --quiet" +               # be quiet
+              " --quiet" +               # be quiet
               # " --warn-error" +          # stop at the first warning
               # " --no-header" +           # do not insert the bibtex2html command in the HTML document (default is to insert it as a comment at the beginning)
               # " --command command" +     # specify the BibTeX command (default is bibtex -min-crossrefs=1000). Useful if you need to specify the full path of the bibtex command
