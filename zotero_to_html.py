@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-"""
+"""Convert Zotero library/collection to BibTeX database and HTML files.
+
 Export the whole Zotero library (or a collection) to BibTeX using Better
 BibTeX and use the BibTeX2HTML tool to make nicely formatted HTML files with
 with abstracts, links, etc.
@@ -40,6 +41,9 @@ Ref: https://github.com/retorquere/zotero-better-bibtex/wiki/Scripting
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+__version__ = '0.1'
+__author__ = 'Do Tran'
 
 import sys
 import time
