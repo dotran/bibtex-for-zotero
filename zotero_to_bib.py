@@ -17,9 +17,7 @@ DEFAULT_OUTPUT = "./biblio.bib"
 
 
 def zotero_to_bib(zotero_localhost_url, output_file):
-    """
-    Export the whole Zotero library (or a collection) to BibTeX using Better
-    BibTeX.
+    """Export Zotero library/collection to BibTeX using Better BibTeX.
     
     NOTE #1:
     I decided to use the Zotero localhost utility along with Better BibTeX, as
