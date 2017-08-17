@@ -11,9 +11,9 @@ import time
 import bibutils
 
 
-EXCLUDED_FIELDS = (
-    'note',
-    'isbn',
+EXCLUDED_FIELDS = [
+    'note',  # removed for CV bib
+    'isbn',  # removed for CV bib
     'abstract',
     'month',
     'file',
@@ -27,10 +27,11 @@ EXCLUDED_FIELDS = (
     'lccn',
     'pmid',
     'pmcid',
-    'dateadded')
+    'dateadded',
+    ]
 
 
-def beautify_bib(new_bib):
+def beautify_bib(new_bib, cv=False):
     """
     Reads a BIB file and re-format it to create a cleaner and nicer version.
     You only need to specify the input and output bib files.
@@ -42,6 +43,10 @@ def beautify_bib(new_bib):
     except KeyError:
         print("WARNING: Absent 'dateadded' field ==> Sorting skipped.")
         bib = new_bib
+    
+    if cv:
+        if 'note' in EXCLUDED_FIELDS: EXCLUDED_FIELDS.remove('note')
+        if 'isbn' in EXCLUDED_FIELDS: EXCLUDED_FIELDS.remove('isbn')
     
     bibutils.format_output(bib,
                            excluded_fields=EXCLUDED_FIELDS,
