@@ -13,10 +13,9 @@ from .check_duplicate_citekeys import check_duplicate_citekeys
 
 
 def read_bib_file(bibfile, omit_indecent_citekey=False, verbose=True):
-    """
-    Read a bibliography .bib file into a list of dictionaries
+    """Read a bibliography .bib file into a list of dictionaries.
     
-    OUTPUT:
+    Output:
         a list of dictionaries, in which
             {'id' :  citekey,
              'raw': a list of all *raw* lines of the entry identified by 'id'}
